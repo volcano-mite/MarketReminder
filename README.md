@@ -1,3 +1,6 @@
+
+# MarketReminder
+Your financial market reminder.
 # 最小化 Python 开发环境
 
 这是一个使用 VS Code Dev Containers 和 Poetry 搭建的最小化 Python 开发环境。
@@ -37,3 +40,4 @@
     poetry --version
     ```
 如果都能正确显示版本号，那么你的开发环境就成功启动了！
+
