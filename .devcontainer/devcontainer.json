@@ -1,0 +1,61 @@
+// {
+//   "name": "Full-Stack Stock Monitor",
+//   "dockerComposeFile": "docker-compose.yml",
+//   "service": "api",
+//   "workspaceFolder": "/workspace",
+
+//   "customizations": {
+//     "vscode": {
+//       "extensions": [
+//         "ms-python.python",
+//         "ms-python.vscode-pylance",
+//         "ms-python.black-formatter",
+//         "ms-azuretools.vscode-docker"
+//       ],
+//       "settings": {
+//         "python.defaultInterpreterPath": "/usr/bin/python",
+//         "python.analysis.autoImportCompletions": true
+//       }
+//     }
+//   },
+
+//   "postCreateCommand": "pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev"
+// }
+
+{
+  "name": "Full-Stack Stock Monitor",
+
+  // 直接通过 Dockerfile 构建，而不是 Docker Compose
+  "build": {
+    "dockerfile": "Dockerfile",
+    // "context" 设置为 ".." 代表 Dockerfile 在构建时可以访问项目根目录的所有文件
+    "context": "../"
+  },
+
+  // 告诉 VS Code 在容器内的哪个目录打开
+ // 这样即使项目改名了，配置也依然有效
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  // 自定义 VS Code 在容器内的行为
+  "customizations": {
+    "vscode": {
+      // 自动为环境安装这些实用的扩展
+      "extensions": [
+        "ms-python.python",       // Python 官方支持
+        "ms-python.vscode-pylance", // 智能代码提示
+        "charliermarsh.ruff"      // 高性能代码检查和格式化工具
+      ],
+      // 自动应用的设置
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
+        }
+      }
+    }
+  },
+
+  // 容器创建成功后，自动执行这个命令（可以用来验证环境）
+  "postCreateCommand": "poetry --version"
+}
