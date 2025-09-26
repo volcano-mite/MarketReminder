@@ -1,41 +1,32 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
-  # 我们的 FastAPI 应用服务
-  api:
-    build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile
-    volumes:
-      # 将本地代码实时同步到容器的 /workspaces/项目名 目录下
-      - .:/workspaces/${localWorkspaceFolderBasename}:cached
-    ports:
-      - "8000:8000" # 映射 API 端口
-      - "5678:5678" # 映射 Python 调试器端口
-    environment:
-      # 将数据库连接信息作为环境变量传入
-      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/app_db
-    # 依赖于 db 服务，确保 db 先启动
-    depends_on:
-      - db
-    # 覆盖 Dockerfile 的 CMD，让容器保持运行以待开发
-    command: sleep infinity
-
-  # PostgreSQL 数据库服务
+  # 数据库服务
   db:
-    image: postgres:14-alpine
-    restart: unless-stopped
-    volumes:
-      # 将数据库数据持久化到本地，防止容器删除后数据丢失
-      - db_data:/var/lib/postgresql/data
+    image: postgres:13
+    container_name: stock_db
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=app_db
+      - POSTGRES_DB=stock_alerts
     ports:
-      # 可选：将容器的 5432 端口映射到本地 5433，方便使用本地数据库工具连接调试
-      - "5433:5432"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  # 我们的 FastAPI API 服务
+  api:
+    build: .  # 使用当前目录下的 Dockerfile 来构建镜像
+    container_name: stock_api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./app:/workspaces/stock_full_stack/app  # 将本地 app 目录挂载到容器中，实现代码热重载
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db/stock_alerts
+    depends_on:
+      - db  # 确保 db 服务先于 api 服务启动
 
 volumes:
-  db_data:
+  postgres_data:
